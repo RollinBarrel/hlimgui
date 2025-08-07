@@ -395,7 +395,7 @@ class ImGuiApp extends hxd.App {
   }
 }
 
-private class ImGuiScene extends h2d.Scene {
+class ImGuiScene extends h2d.Scene {
 
   var overlay:h2d.Interactive;
   var drawable:imgui.ImGuiDrawable;
