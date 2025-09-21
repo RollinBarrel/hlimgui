@@ -37,7 +37,7 @@ if( MARKDOWN )
 endif()
 
 
-add_library(${TARGET_NAME}${TARGET_EXT} SHARED ${SOURCES} ${IMGUI_SOURCES})
+add_library(${TARGET_NAME}${TARGET_EXT} ${SOURCES} ${IMGUI_SOURCES})
 
 add_compile_definitions(IMGUI_USER_CONFIG="../../imgui_config.h")
 
@@ -48,19 +48,51 @@ set_target_properties(${TARGET_NAME}${TARGET_EXT}
     SUFFIX ${TARGET_EXT}
 )
 
+target_include_directories(${TARGET_NAME}${TARGET_EXT} PUBLIC lib/imgui/)
+
 IF (WIN32)
-target_include_directories(${TARGET_NAME}${TARGET_EXT} PUBLIC $ENV{HASHLINKPATH}/include lib/imgui/ )
-target_link_libraries(${TARGET_NAME}${TARGET_EXT} $ENV{HASHLINKPATH}/libhl.lib)
+    IF(BUILD_HASHLINK)
+		IF (NOT TARGET libhl)
+            add_subdirectory(../../hashlink hashlink)
+            set_property(TARGET libhl PROPERTY POSITION_INDEPENDENT_CODE ON)
+		ENDIF()
+		target_link_libraries(${TARGET_NAME}${TARGET_EXT} libhl)
+	ELSE()
+        target_include_directories(${TARGET_NAME}${TARGET_EXT} PUBLIC $ENV{HASHLINKPATH}/include)
+        target_link_libraries(${TARGET_NAME}${TARGET_EXT} $ENV{HASHLINKPATH}/libhl.lib)
+    ENDIF()
 ELSEIF (APPLE)
-find_library(APPLICATION_SERVICES_FRAMEWORK ApplicationServices REQUIRED)
-set(HLPATH /usr/local)
-target_include_directories(${TARGET_NAME}${TARGET_EXT} PUBLIC ${HLPATH}/include lib/imgui/)
-target_link_libraries(${TARGET_NAME}${TARGET_EXT} ${HLPATH}/lib/libhl.dylib ${APPLICATION_SERVICES_FRAMEWORK})
+    IF(BUILD_HASHLINK)
+		IF (NOT TARGET libhl)
+            add_subdirectory(../hashlink hashlink)
+            set_property(TARGET libhl PROPERTY POSITION_INDEPENDENT_CODE ON)
+		ENDIF()
+		target_link_libraries(${TARGET_NAME}${TARGET_EXT} libhl)
+	ELSE()
+        set(HLPATH /usr/local)
+        target_include_directories(${TARGET_NAME}${TARGET_EXT} PUBLIC ${HLPATH}/include)
+        target_link_libraries(${TARGET_NAME}${TARGET_EXT} ${HLPATH}/lib/libhl.dylib)
+    ENDIF()
+
+    IF (NOT IOS)
+        find_library(APPLICATION_SERVICES_FRAMEWORK ApplicationServices REQUIRED)
+        target_link_libraries(${TARGET_NAME}${TARGET_EXT} ${APPLICATION_SERVICES_FRAMEWORK})
+    ENDIF()
 ELSE()
-target_include_directories(${TARGET_NAME}${TARGET_EXT} PUBLIC $ENV{HASHLINKPATH}/include lib/imgui/ )
-target_link_libraries(${TARGET_NAME}${TARGET_EXT} $ENV{HASHLINKPATH}/libhl.so)
+    IF(BUILD_HASHLINK)
+		IF (NOT TARGET libhl)
+            add_subdirectory(../hashlink hashlink)
+            set_property(TARGET libhl PROPERTY POSITION_INDEPENDENT_CODE ON)
+		ENDIF()
+		target_link_libraries(${TARGET_NAME}${TARGET_EXT} libhl)
+	ELSE()
+        target_include_directories(${TARGET_NAME}${TARGET_EXT} PUBLIC $ENV{HASHLINKPATH}/include)
+        target_link_libraries(${TARGET_NAME}${TARGET_EXT} $ENV{HASHLINKPATH}/libhl.so)
+    ENDIF()
 ENDIF()
 
 add_custom_command(TARGET ${TARGET_NAME}${TARGET_EXT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_NAME}${TARGET_EXT}> ../..
 )
+
+install(TARGETS ${TARGET_NAME}${TARGET_EXT} DESTINATION lib)
