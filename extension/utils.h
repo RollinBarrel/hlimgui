@@ -13,7 +13,9 @@
 #define _TRENDERLIST _OBJ(_ARR _I32)
 
 #include <string>
+extern "C" {
 #include <hl.h>
+}
 #include <vector>
 #include "lib/imgui/imgui.h"
 #include "types.h"

@@ -1005,7 +1005,7 @@ abstract ImVec4(ImVec4S) from ImVec4S to ImVec4S {
 	var LogSliderDeadzone: Single;          // The size in pixels of the dead-zone around zero on logarithmic sliders that cross zero.
 	var TabRounding: Single;                // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
 	var TabBorderSize: Single;              // Thickness of border around tabs.
-	var TabMinWidthForCloseButton: Single;  // Minimum width for close button to appears on an unselected tab when hovered. Set to 0.0f to always show when hovering, set to FLT_MAX to never show close button unless selected.
+	var TabMinWidthForCloseButton: Single;  // Minimum width for close button to appears on an unselected tab when hovered. Set to 0.0f to always show when hovering, set to _FLT_MAX to never show close button unless selected.
 	var ColorButtonPosition: ImGuiDir;        // Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right.
 	@:flatten var ButtonTextAlign: ImVec2S;            // Alignment of button text when button is larger than text. Defaults to (0.5f, 0.5f) (centered).
 	@:flatten var SelectableTextAlign: ImVec2S;        // Alignment of selectable text. Defaults to (0.0f, 0.0f) (top-left aligned). It's generally important to keep this left-aligned if you want to lay multiple items on a same line.
@@ -1127,7 +1127,7 @@ enum abstract ImGuiKeyChord(Int) from Int to Int {
 
 	public function addKeyEvent( key: ImGuiKey, down: Bool ) { io_add_key_event(this, key, down); } 								// Queue a new key down/up event. Key should be "translated" (as in, generally ImGuiKey_A matches the key end-user would use to emit an 'A' character)
 	public function addKeyAnalogEvent( key: ImGuiKey, down: Bool, v: Single ) { io_add_key_analog_event(this, key, down, v); }		// Queue a new key down/up event for analog values (e.g. ImGuiKey_Gamepad_ values). Dead-zones should be handled by the backend.
-	public function addMousePosEvent( x: Single, y: Single ) { io_add_mouse_pos_event(this, x, y); }							// Queue a mouse position update. Use -FLT_MAX,-FLT_MAX to signify no mouse (e.g. app not focused and not hovered)
+	public function addMousePosEvent( x: Single, y: Single ) { io_add_mouse_pos_event(this, x, y); }							// Queue a mouse position update. Use -_FLT_MAX,-_FLT_MAX to signify no mouse (e.g. app not focused and not hovered)
 	public function addMouseButtonEvent( button: Int, down: Bool ) { io_add_mouse_button_event(this, button, down); }				// Queue a mouse button change
 	public function addMouseWheelEvent( wheel_x: Single, wheel_y: Single ) { io_add_mouse_wheel_event(this, wheel_x, wheel_y); }					// Queue a mouse wheel update. wheel_y<0: scroll down, wheel_y>0: scroll up, wheel_x<0: scroll right, wheel_x>0: scroll left.
 	public function addMouseViewportEvent( id: ImGuiID ) { io_add_mouse_viewport_event(this, id ); }								// Queue a mouse hovered viewport. Requires backend to set ImGuiBackendFlags_HasMouseHoveredViewport to call this (for multi-viewport support).
@@ -1180,7 +1180,7 @@ enum abstract ImGuiKeyChord(Int) from Int to Int {
     var MetricsRenderWindows: Int;                // Number of visible windows
     var MetricsActiveWindows: Int;                // Number of active windows
     var MetricsActiveAllocations: Int;            // Number of active allocations, updated by MemAlloc/MemFree based on current context. May be off if you have multiple imgui contexts.
-    @:flatten var MouseDelta: ImVec2S;            // Mouse delta. Note that this is zero if either current or previous position are invalid (-FLT_MAX,-FLT_MAX), so a disappearing/reappearing mouse won't have a huge delta.
+    @:flatten var MouseDelta: ImVec2S;            // Mouse delta. Note that this is zero if either current or previous position are invalid (-_FLT_MAX,-_FLT_MAX), so a disappearing/reappearing mouse won't have a huge delta.
 
 	//------------------------------------------------------------------
     // [Internal] Dear ImGui will maintain those fields. Forward compatibility not guaranteed!
@@ -1495,8 +1495,8 @@ abstract ImDragDropPayload(ImDragDropPayloadPtr) from ImDragDropPayloadPtr to Im
 @:hlNative("hlimgui")
 class ImGui
 {
-	public static inline var FLT_MAX = 3.402823466e+38;
-	public static inline var FLT_MIN = 1.175494e-38;
+	public static inline var _FLT_MAX = 3.402823466e+38;
+	public static inline var _FLT_MIN = 1.175494e-38;
 
 	// Context
 	public static function createContext() : ImContextPtr {return null;}
@@ -1837,8 +1837,8 @@ class ImGui
 	// Widgets: List Boxes
 	/**
 		You MUST call `endListBox()` if this method returns `true`!
-		- Choose frame width:   size.x > 0.0f: custom  /  size.x < 0.0f or -FLT_MIN: right-align   /  size.x = 0.0f (default): use current ItemWidth
-		- Choose frame height:  size.y > 0.0f: custom  /  size.y < 0.0f or -FLT_MIN: bottom-align  /  size.y = 0.0f (default): arbitrary default height which can fit ~7 items
+		- Choose frame width:   size.x > 0.0f: custom  /  size.x < 0.0f or -_FLT_MIN: right-align   /  size.x = 0.0f (default): use current ItemWidth
+		- Choose frame height:  size.y > 0.0f: custom  /  size.y < 0.0f or -_FLT_MIN: bottom-align  /  size.y = 0.0f (default): arbitrary default height which can fit ~7 items
 	**/
 	public static function beginListBox(label: String, ?size: ImVec2): Bool { return false; }
 	/** Only call `endListBox()` if `beginListBox()` returns `true`! **/
@@ -1848,8 +1848,8 @@ class ImGui
 	// TODO: Callback variant
 
 	// Widgets: Data Plotting
-	public static function plotLines(label : String, values : hl.NativeArray<Single>, values_offset : Int = 0, overlay_text : String = null, scale_min : Single = FLT_MAX, scale_max : Single = FLT_MAX, ?graph_size : ImVec2) {}
-	public static function plotHistogram(label : String, values : hl.NativeArray<Single>, values_offset : Int = 0, overlay_text : String = null, scale_min : Single = FLT_MAX, scale_max : Single = FLT_MAX, ?graph_size : ImVec2) {}
+	public static function plotLines(label : String, values : hl.NativeArray<Single>, values_offset : Int = 0, overlay_text : String = null, scale_min : Single = _FLT_MAX, scale_max : Single = _FLT_MAX, ?graph_size : ImVec2) {}
+	public static function plotHistogram(label : String, values : hl.NativeArray<Single>, values_offset : Int = 0, overlay_text : String = null, scale_min : Single = _FLT_MAX, scale_max : Single = _FLT_MAX, ?graph_size : ImVec2) {}
 
 	// Widgets: Value() Helpers.
 	public static function valueBool(prefix : String, b : Bool) {}

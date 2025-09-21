@@ -15,7 +15,9 @@
 #pragma once
 
 // Prevent windows from defining min/max functions (Some libs use std:: versions, which will explode)
+#ifndef __MINGW32__
 #define NOMINMAX
+#endif
 
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.
@@ -71,7 +73,10 @@
 
 // #include "../utils.h"
 
+extern "C" {
 #include <hl.h>
+}
+#undef _GUID
 #include "types.h"
 
 #define IM_VEC2_CLASS_EXTRA                                                 \

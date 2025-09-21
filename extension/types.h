@@ -1,6 +1,8 @@
 #pragma once
 
+extern "C" {
 #include <hl.h>
+}
 typedef struct ImVec2 ImVec2;
 typedef struct ImVec4 ImVec4;
 
